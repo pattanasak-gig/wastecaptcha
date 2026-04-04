@@ -41,6 +41,41 @@ body {
 .api-badge.ok      { background: #e8f5e9; color: var(--green); }
 .api-badge.error   { background: #ffebee; color: var(--red); }
 
+/* ── Login Overlay ───────────────────────────────────────── */
+.login-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.login-overlay.hidden { display: none !important; }
+
+.login-box {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.15);
+  padding: 36px 32px;
+  width: 100%; max-width: 360px;
+  text-align: center;
+}
+.login-logo  { font-size: 2.8rem; margin-bottom: 8px; }
+.login-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; }
+.login-sub   { font-size: .85rem; color: var(--sub); margin-bottom: 24px; }
+
+.login-form  { display: flex; flex-direction: column; gap: 12px; }
+.login-input {
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  text-align: center;
+  letter-spacing: .1em;
+  transition: border-color .15s;
+}
+.login-input:focus { border-color: var(--green); }
+.login-error { color: var(--red); font-size: .85rem; }
+
 /* ── Tab Nav ─────────────────────────────────────────────── */
 .tab-nav {
   display: flex;

@@ -4,14 +4,49 @@
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby45b9-lXfVH_4yDhAR3THu3FVF-g524gY8RQ6LQQ4VETt7r756C7PFMQLxxbLx650S4A/exec';
 
+// ── PASSWORD ──────────────────────────────────────────────────
+const ADMIN_PASSWORD = 'admin1234'; // ← เปลี่ยนรหัสผ่านตรงนี้
+
 // ── STATE ─────────────────────────────────────────────────────
 let allRows    = [];
 let allPlayers = [];
 let dateFilter = 'all';
 let sortDir    = -1;   // -1 = desc (high→low), 1 = asc
 
-// ── INIT ──────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+// ── LOGIN ─────────────────────────────────────────────────────
+function checkLogin() {
+  const stored = sessionStorage.getItem('admin_ok');
+  if (stored === 'yes') {
+    document.getElementById('login-overlay').classList.add('hidden');
+    return true;
+  }
+  return false;
+}
+
+function setupLogin() {
+  const overlay = document.getElementById('login-overlay');
+  const input   = document.getElementById('login-input');
+  const btn     = document.getElementById('login-btn');
+  const errEl   = document.getElementById('login-error');
+
+  const attempt = () => {
+    if (input.value === ADMIN_PASSWORD) {
+      sessionStorage.setItem('admin_ok', 'yes');
+      overlay.classList.add('hidden');
+      initApp();
+    } else {
+      errEl.classList.remove('hidden');
+      input.value = '';
+      input.focus();
+    }
+  };
+
+  btn.addEventListener('click', attempt);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+  input.focus();
+}
+
+function initApp() {
   // Tab switching
   document.getElementById('tab-btn-questions').addEventListener('click', () => switchTab('questions'));
   document.getElementById('tab-btn-players').addEventListener('click',   () => switchTab('players'));
@@ -40,9 +75,17 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPlayers();
   });
 
-  // Initial load
   checkApiConnection();
   loadQuestions();
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  if (checkLogin()) {
+    initApp();
+  } else {
+    setupLogin();
+  }
 });
 
 // ── TAB SWITCH ────────────────────────────────────────────────
