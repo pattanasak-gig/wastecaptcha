@@ -24,7 +24,7 @@
       </p>
       <div class="score-legend">
         <div class="legend-item correct">เลือกถูก&nbsp;<span>+2</span></div>
-        <div class="legend-item wrong">เลือกผิด&nbsp;<span>-1</span></div>
+        <div class="legend-item wrong">เลือกผิด&nbsp;<span>-2</span></div>
         <div class="legend-item missed">พลาด&nbsp;<span>-1</span></div>
       </div>
       <button id="btn-start" class="btn btn-primary btn-lg">เริ่มเกม</button>
@@ -116,9 +116,8 @@
           <input id="input-phone" type="tel" placeholder="0812345678" maxlength="10" pattern="[0-9]{10}" />
         </div>
         <div id="form-error" class="form-error hidden"></div>
-        <button id="btn-save" class="btn btn-primary btn-full">
-          บันทึกคะแนน
-        </button>
+        <button id="btn-save" class="btn btn-primary btn-full">บันทึกคะแนน</button>
+        <button id="btn-anonymous" class="btn btn-outline btn-full">ไม่ระบุตัวตน</button>
         <div id="save-loading" class="loading-msg hidden">
           <span class="spinner"></span> กำลังบันทึก…
         </div>
@@ -126,6 +125,7 @@
 
       <!-- Leaderboard -->
       <div id="leaderboard-section" class="leaderboard-section hidden">
+        <div id="player-rank-msg" class="player-rank-msg hidden"></div>
         <h3>🏅 Top 10</h3>
         <ol id="leaderboard-list" class="leaderboard-list"></ol>
         <button id="btn-replay" class="btn btn-outline btn-full">เล่นอีกครั้ง</button>

@@ -100,7 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btn-start').addEventListener('click', startGame);
   $('btn-confirm').addEventListener('click', submitAnswer);
   $('btn-next').addEventListener('click', nextRound);
-  $('btn-save').addEventListener('click', savePlayer);
+  $('btn-save').addEventListener('click', () => savePlayer(false));
+  $('btn-anonymous').addEventListener('click', () => savePlayer(true));
   $('btn-replay').addEventListener('click', () => location.reload());
   $('btn-info').addEventListener('click', () => $('info-modal').classList.remove('hidden'));
   $('btn-close-info').addEventListener('click', () => $('info-modal').classList.add('hidden'));
@@ -165,13 +166,12 @@ function renderRound() {
   const grid = $('image-grid');
   grid.innerHTML = '';
 
-  // สุ่มและปรับให้แสดงครั้งละ 12 รูปเสมอ
-  const TARGET = 12;
-  let pool = shuffle(round.images);
-  // ถ้ารูปน้อยกว่า 12 ให้วนซ้ำจนครบ
-  while (pool.length < TARGET) pool = pool.concat(shuffle(round.images));
-  currentImages = shuffle(pool.slice(0, TARGET));
-  grid.className = 'image-grid cols-4'; // 4 คอลัมน์ × 3 แถว = 12 รูปเสมอ
+  // สุ่ม 8 ถูก + 4 ผิด = 12 เสมอ (ไม่ซ้ำ)
+  const NEED_CORRECT = 8, NEED_WRONG = 4;
+  const correctPool = shuffle(round.images.filter(img => img.isCorrect));
+  const wrongPool   = shuffle(round.images.filter(img => !img.isCorrect));
+  currentImages = shuffle([...correctPool.slice(0, NEED_CORRECT), ...wrongPool.slice(0, NEED_WRONG)]);
+  grid.className = 'image-grid cols-4';
 
   currentImages.forEach((img, i) => {
     const cell = document.createElement('div');
@@ -228,10 +228,10 @@ function submitAnswer() {
       totalCorrect += 1;
       items.push({ img, type: 'correct', delta: +2, chosen });
     } else if (chosen && !img.isCorrect) {
-      // เลือกผิด -1
-      roundScore  -= 1;
+      // เลือกผิด -2
+      roundScore  -= 2;
       totalWrong  += 1;
-      items.push({ img, type: 'wrong', delta: -1, chosen });
+      items.push({ img, type: 'wrong', delta: -2, chosen });
     } else if (!chosen && img.isCorrect) {
       // พลาดรูปที่ถูก -1
       roundScore  -= 1;
@@ -261,10 +261,10 @@ function showRoundResult(round, items, roundScore) {
   container.innerHTML = '';
 
   const typeConfig = {
-    correct: { icon: '✅', label: 'เลือกถูก',         cls: 'item-correct' },
-    wrong:   { icon: '❌', label: 'เลือกผิด',         cls: 'item-wrong'   },
-    missed:  { icon: '⚠️', label: 'ลืมเลือก',        cls: 'item-missed'  },
-    ok:      { icon: '⬜', label: 'ไม่เลือก (ถูกแล้ว)', cls: 'item-ok'   },
+    correct: { icon: '✅', label: 'เลือกถูก (+2)',    cls: 'item-correct' },
+    wrong:   { icon: '❌', label: 'เลือกผิด (-2)',    cls: 'item-wrong'   },
+    missed:  { icon: '⚠️', label: 'ลืมเลือก (-1)',   cls: 'item-missed'  },
+    ok:      { icon: '⬜', label: 'ไม่เลือก (ถูก)',  cls: 'item-ok'      },
   };
 
   // เรียงให้ correct/wrong/missed ขึ้นก่อน ok
@@ -337,23 +337,30 @@ function showFinalScreen() {
 }
 
 // ── SAVE PLAYER ───────────────────────────────────────────────
-async function savePlayer() {
-  const name  = $('input-name').value.trim();
-  const phone = $('input-phone').value.trim();
+async function savePlayer(anonymous = false) {
   const errorEl = $('form-error');
-
-  // Validate
   errorEl.classList.add('hidden');
-  if (!name) {
-    errorEl.textContent = 'กรุณากรอกชื่อ';
-    return errorEl.classList.remove('hidden');
-  }
-  if (!/^0[0-9]{9}$/.test(phone)) {
-    errorEl.textContent = 'กรุณากรอกเบอร์โทรให้ถูกต้อง (10 หลัก เริ่มด้วย 0)';
-    return errorEl.classList.remove('hidden');
+
+  let name, phone;
+
+  if (anonymous) {
+    name  = 'ไม่ระบุ';
+    phone = '0000000000';
+  } else {
+    name  = $('input-name').value.trim();
+    phone = $('input-phone').value.trim();
+    if (!name) {
+      errorEl.textContent = 'กรุณากรอกชื่อ';
+      return errorEl.classList.remove('hidden');
+    }
+    if (!/^0[0-9]{9}$/.test(phone)) {
+      errorEl.textContent = 'กรุณากรอกเบอร์โทรให้ถูกต้อง (10 หลัก เริ่มด้วย 0)';
+      return errorEl.classList.remove('hidden');
+    }
   }
 
-  $('btn-save').disabled = true;
+  $('btn-save').disabled    = true;
+  $('btn-anonymous').disabled = true;
   $('save-loading').classList.remove('hidden');
 
   const payload = {
@@ -372,61 +379,96 @@ async function savePlayer() {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),
-        mode:    'no-cors', // Apps Script Web App ต้องการ no-cors
+        mode:    'no-cors',
       });
     }
-    // ซ่อนฟอร์ม — โหลด leaderboard
     $('register-form').classList.add('hidden');
-    await loadLeaderboard();
+    await loadLeaderboard(name);
   } catch (err) {
     errorEl.textContent = 'บันทึกไม่สำเร็จ: ' + err.message;
     errorEl.classList.remove('hidden');
-    $('btn-save').disabled = false;
+    $('btn-save').disabled    = false;
+    $('btn-anonymous').disabled = false;
   } finally {
     $('save-loading').classList.add('hidden');
   }
 }
 
 // ── LEADERBOARD ───────────────────────────────────────────────
-async function loadLeaderboard() {
+async function loadLeaderboard(savedName) {
   const section = $('leaderboard-section');
   const list    = $('leaderboard-list');
   list.innerHTML = '<li style="color:#888">กำลังโหลด…</li>';
   section.classList.remove('hidden');
+  $('player-rank-msg').classList.add('hidden');
 
   let players = [];
 
   try {
     if (APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
-      const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLeaderboard`);
+      const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLeaderboard&_t=` + Date.now());
       const json = await res.json();
       players = json.leaderboard || [];
     }
-  } catch (_) {
-    // ถ้า fetch ไม่สำเร็จ แสดงผลเฉพาะผู้เล่นปัจจุบัน
-  }
+  } catch (_) {}
 
-  // ถ้าไม่มีข้อมูล หรือเป็น demo mode — แสดงคะแนนปัจจุบัน
   if (players.length === 0) {
-    players = [{ name: $('input-name').value.trim() || 'คุณ', score: totalScore }];
+    players = [{ name: savedName || 'คุณ', score: totalScore }];
   }
 
+  // จัดกลุ่มตาม score → แต่ละกลุ่มคือ rank เดียว
+  const groups = [];
+  players.forEach(p => {
+    const last = groups[groups.length - 1];
+    if (last && last.score === p.score) {
+      last.names.push(p.name);
+    } else {
+      groups.push({ score: p.score, names: [p.name], rank: 0 });
+    }
+  });
+  // กำหนด rank จริง (นับจากจำนวนผู้เล่นที่อยู่ก่อนหน้า)
+  let pos = 1;
+  groups.forEach(g => { g.rank = pos; pos += g.names.length; });
+
+  // หา rank ของผู้เล่นปัจจุบัน
+  let myRank = null;
+  groups.forEach(g => {
+    if (g.score === totalScore) myRank = g.rank;
+  });
+
+  // แสดงข้อความลำดับ (ถ้าไม่ติด top 10 หรือติด)
+  const rankEl = $('player-rank-msg');
+  if (myRank !== null) {
+    const medals = ['🥇','🥈','🥉'];
+    const medal  = myRank <= 3 ? medals[myRank - 1] + ' ' : '';
+    rankEl.textContent = `${medal}คุณได้ลำดับที่ ${myRank} (${totalScore} แต้ม)`;
+    rankEl.classList.remove('hidden');
+  }
+
+  // แสดง Top 10 กลุ่ม
   list.innerHTML = '';
-  players.forEach((p, i) => {
-    const li    = document.createElement('li');
-    const rank  = document.createElement('span');
-    rank.className = 'lb-rank';
-    rank.textContent = ['🥇','🥈','🥉'][i] || `${i+1}.`;
+  groups.slice(0, 10).forEach(g => {
+    const li       = document.createElement('li');
+    const rankSpan = document.createElement('span');
+    rankSpan.className = 'lb-rank';
+    const medals = ['🥇','🥈','🥉'];
+    rankSpan.textContent = medals[g.rank - 1] || `${g.rank}.`;
 
-    const name  = document.createElement('span');
-    name.className = 'lb-name';
-    name.textContent = p.name;
+    const nameSpan  = document.createElement('span');
+    nameSpan.className = 'lb-name';
+    nameSpan.textContent = g.names.join(', ');
 
-    const score = document.createElement('span');
-    score.className = 'lb-score';
-    score.textContent = p.score + ' แต้ม';
+    const scoreSpan = document.createElement('span');
+    scoreSpan.className = 'lb-score';
+    scoreSpan.textContent = g.score + ' แต้ม';
+    if (g.names.length > 1) {
+      const tie = document.createElement('span');
+      tie.className = 'lb-tie';
+      tie.textContent = ` (${g.names.length} คน)`;
+      scoreSpan.appendChild(tie);
+    }
 
-    li.append(rank, name, score);
+    li.append(rankSpan, nameSpan, scoreSpan);
     list.appendChild(li);
   });
 }
