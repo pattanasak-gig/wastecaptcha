@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แยกให้ถูก! - Greener Bangkok</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       หน้า 1: START SCREEN
+  ══════════════════════════════════════════ -->
+  <div id="start-screen" class="screen active">
+    <div class="start-card">
+      <div class="logo-wrap">
+        <span class="logo-emoji">♻️</span>
+      </div>
+      <h1 class="game-title">แยกให้ถูก!</h1>
+      <p class="game-desc">
+        ทดสอบความรู้การแยกขยะของคุณ!<br />
+        เลือกรูปที่ตรงกับประเภทขยะที่กำหนด<br />
+        <strong>ยิ่งถูกมาก ยิ่งได้คะแนนมาก</strong>
+      </p>
+      <div class="score-legend">
+        <div class="legend-item correct">เลือกถูก&nbsp;<span>+2</span></div>
+        <div class="legend-item wrong">เลือกผิด&nbsp;<span>-1</span></div>
+        <div class="legend-item missed">พลาด&nbsp;<span>-1</span></div>
+      </div>
+      <button id="btn-start" class="btn btn-primary btn-lg">เริ่มเกม</button>
+      <div id="loading-msg" class="loading-msg hidden">
+        <span class="spinner"></span> กำลังโหลดโจทย์…
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       หน้า 2: GAME SCREEN
+  ══════════════════════════════════════════ -->
+  <div id="game-screen" class="screen">
+    <div class="captcha-card">
+
+      <!-- Header -->
+      <div class="captcha-header">
+        <div class="captcha-prompt">
+          <span class="prompt-label">เลือกทุกช่องที่เป็น</span>
+          <span id="question-text" class="prompt-question">ขยะอินทรีย์</span>
+        </div>
+        <div class="captcha-meta">
+          <div class="round-badge">รอบ <span id="round-current">1</span>/<span id="round-total">1</span></div>
+          <div class="score-display">คะแนน: <strong id="score-display">0</strong></div>
+        </div>
+      </div>
+
+      <!-- Image Grid -->
+      <div id="image-grid" class="image-grid"></div>
+
+      <!-- Footer -->
+      <div class="captcha-footer">
+        <div class="footer-left">
+          <button id="btn-info" class="btn-icon" title="วิธีเล่น">ℹ️</button>
+        </div>
+        <button id="btn-confirm" class="btn btn-confirm">ยืนยัน</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       หน้า 3: ROUND RESULT SCREEN
+  ══════════════════════════════════════════ -->
+  <div id="result-screen" class="screen">
+    <div class="result-card">
+      <h2 class="result-title">ผลรอบที่ <span id="result-round-num">1</span></h2>
+      <p class="result-category">หมวด: <strong id="result-category-text">ขยะอินทรีย์</strong></p>
+
+      <div id="result-items" class="result-items"></div>
+
+      <div class="result-summary">
+        <span>คะแนนรอบนี้: </span>
+        <strong id="result-round-score" class="round-score-val">0</strong>
+      </div>
+
+      <button id="btn-next" class="btn btn-primary">รอบถัดไป ›</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       หน้า 4: FINAL SCREEN (ลงทะเบียน + Leaderboard)
+  ══════════════════════════════════════════ -->
+  <div id="final-screen" class="screen">
+    <div class="final-card">
+      <div class="final-top">
+        <div class="trophy">🏆</div>
+        <h2 class="final-title">จบเกม!</h2>
+        <div class="final-score-box">
+          <div class="final-score-num" id="final-score">0</div>
+          <div class="final-score-label">คะแนน</div>
+        </div>
+        <div class="final-stats">
+          <span class="stat correct">✅ ถูก: <strong id="stat-correct">0</strong></span>
+          <span class="stat wrong">❌ ผิด: <strong id="stat-wrong">0</strong></span>
+          <span class="stat missed">⚠️ พลาด: <strong id="stat-missed">0</strong></span>
+        </div>
+      </div>
+
+      <!-- ฟอร์มบันทึกคะแนน -->
+      <div id="register-form" class="register-form">
+        <h3>บันทึกคะแนนของคุณ</h3>
+        <div class="form-group">
+          <label for="input-name">ชื่อ</label>
+          <input id="input-name" type="text" placeholder="ชื่อ-นามสกุล" maxlength="50" />
+        </div>
+        <div class="form-group">
+          <label for="input-phone">เบอร์โทรศัพท์</label>
+          <input id="input-phone" type="tel" placeholder="0812345678" maxlength="10" pattern="[0-9]{10}" />
+        </div>
+        <div id="form-error" class="form-error hidden"></div>
+        <button id="btn-save" class="btn btn-primary btn-full">
+          บันทึกคะแนน
+        </button>
+        <div id="save-loading" class="loading-msg hidden">
+          <span class="spinner"></span> กำลังบันทึก…
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div id="leaderboard-section" class="leaderboard-section hidden">
+        <h3>🏅 Top 10</h3>
+        <ol id="leaderboard-list" class="leaderboard-list"></ol>
+        <button id="btn-replay" class="btn btn-outline btn-full">เล่นอีกครั้ง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       MODAL: วิธีเล่น
+  ══════════════════════════════════════════ -->
+  <div id="info-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>วิธีเล่น</h3>
+      <ul>
+        <li>อ่านโจทย์ด้านบน เช่น <em>"เลือกทุกช่องที่เป็น ขยะอินทรีย์"</em></li>
+        <li>คลิกรูปที่คิดว่าตรงกับประเภทที่ถาม (คลิกซ้ำเพื่อยกเลิก)</li>
+        <li>กด <strong>ยืนยัน</strong> เพื่อส่งคำตอบ</li>
+        <li>เลือกถูก <span class="badge-correct">+2</span>, เลือกผิด <span class="badge-wrong">-1</span>, พลาดรูปที่ถูก <span class="badge-missed">-1</span></li>
+      </ul>
+      <button id="btn-close-info" class="btn btn-outline">ปิด</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — แยกให้ถูก!</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="admin-header">
+    <div class="header-left">
+      <span class="header-logo">♻️</span>
+      <div>
+        <div class="header-title">แยกให้ถูก! — Admin</div>
+        <div class="header-sub">จัดการโจทย์และสถิติผู้เล่น</div>
+      </div>
+    </div>
+    <span id="api-status" class="api-badge loading">กำลังเชื่อมต่อ…</span>
+  </header>
+
+  <!-- TAB NAV -->
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tab-btn-questions">📋 รายการโจทย์</button>
+    <button class="tab-btn"        id="tab-btn-players">📊 สถิติผู้เล่น</button>
+  </div>
+
+  <!-- ══ TAB: รายการโจทย์ ══ -->
+  <div id="tab-questions" class="tab-content">
+    <div class="content-toolbar">
+      <h2 class="content-title">📋 รายการโจทย์ทั้งหมด</h2>
+      <button id="btn-refresh-q" class="btn btn-sm btn-outline">🔄 โหลดใหม่</button>
+    </div>
+    <div id="round-summary" class="round-summary"></div>
+    <div id="q-loading" class="state-text">กำลังโหลด…</div>
+    <div id="q-list"    class="question-list hidden"></div>
+    <div id="q-empty"   class="state-text hidden">ยังไม่มีโจทย์ — กรุณาเพิ่มข้อมูลใน Google Sheet</div>
+  </div>
+
+  <!-- ══ TAB: สถิติผู้เล่น ══ -->
+  <div id="tab-players" class="tab-content hidden">
+    <!-- Summary cards -->
+    <div id="stats-cards" class="stats-cards"></div>
+
+    <!-- Filter bar -->
+    <div class="player-filters">
+      <div class="date-filters">
+        <button class="date-btn active" data-f="all">ทั้งหมด</button>
+        <button class="date-btn" data-f="today">วันนี้</button>
+        <button class="date-btn" data-f="week">สัปดาห์นี้</button>
+        <button class="date-btn" data-f="month">เดือนนี้</button>
+      </div>
+      <input id="player-search" type="text" placeholder="🔍 ค้นหาชื่อหรือเบอร์โทร" class="search-input" />
+      <button id="btn-refresh-p" class="btn btn-sm btn-outline">🔄 โหลดใหม่</button>
+    </div>
+
+    <div id="p-loading" class="state-text">กำลังโหลด…</div>
+    <div id="p-table-wrap" class="hidden">
+      <table class="player-table">
+        <thead>
+          <tr>
+            <th class="col-rank">#</th>
+            <th class="col-name">ชื่อ</th>
+            <th class="col-phone">เบอร์โทร</th>
+            <th class="col-score sortable" id="sort-score">คะแนน ▼</th>
+            <th class="col-rounds">รอบ</th>
+            <th class="col-time">วันเวลา</th>
+          </tr>
+        </thead>
+        <tbody id="player-tbody"></tbody>
+      </table>
+    </div>
+    <div id="p-empty" class="state-text hidden">ไม่พบผู้เล่น</div>
+  </div>
+
+</body>
+<script src="admin.js"></script>
+</html>
