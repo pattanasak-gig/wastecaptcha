@@ -263,7 +263,11 @@ function renderPlayers() {
     return;
   }
 
-  tbody.innerHTML = rows.map((p, i) => `
+  tbody.innerHTML = rows.map((p, i) => {
+    const rewardBtn = p.reward
+      ? `<button class="btn btn-rewarded btn-sm" disabled>✅ รับรางวัลแล้ว<br><small>${formatDate(p.redeemedBy)}</small></button>`
+      : `<button class="btn btn-reward btn-sm" onclick="rewardPlayer(${p.rowIndex}, this)">🎁 มอบรางวัล</button>`;
+    return `
     <tr>
       <td class="col-rank">${i + 1}</td>
       <td class="col-name">${esc(p.name)}</td>
@@ -271,8 +275,9 @@ function renderPlayers() {
       <td class="col-score"><strong>${p.score}</strong></td>
       <td class="col-rounds">${p.rounds}</td>
       <td class="col-time">${formatDate(p.timestamp)}</td>
-    </tr>`
-  ).join('');
+      <td class="col-reward">${rewardBtn}</td>
+    </tr>`;
+  }).join('');
 
   hide('p-empty');
   show('p-table-wrap');
@@ -294,6 +299,29 @@ function renderStatsCards(rows) {
 }
 
 // ── HELPERS ───────────────────────────────────────────────────
+// ── REWARD PLAYER ─────────────────────────────────────────────
+async function rewardPlayer(rowIndex, btn) {
+  if (!confirm('บันทึกการมอบรางวัลให้ผู้เล่นแถวนี้?')) return;
+  btn.disabled = true;
+  btn.textContent = 'กำลังบันทึก…';
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ action: 'rewardPlayer', rowIndex }),
+      mode:    'no-cors',
+    });
+    // no-cors ไม่สามารถอ่าน response ได้ — ถือว่าสำเร็จ
+    const now = new Date().toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'2-digit' })
+              + ' ' + new Date().toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
+    btn.outerHTML = `<button class="btn btn-rewarded btn-sm" disabled>✅ รับรางวัลแล้ว<br><small>${now}</small></button>`;
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '🎁 มอบรางวัล';
+    alert('บันทึกไม่สำเร็จ: ' + e.message);
+  }
+}
+
 function show(id) { document.getElementById(id).classList.remove('hidden'); }
 function hide(id) { document.getElementById(id).classList.add('hidden'); }
 function esc(s)   { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }

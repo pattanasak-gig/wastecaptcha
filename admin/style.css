@@ -229,6 +229,12 @@ body {
 .col-score  { width: 90px; }
 .col-rounds { width: 60px; text-align: center; }
 .col-time   { width: 150px; color: var(--sub); font-size: .8rem; }
+.col-reward { width: 140px; text-align: center; }
+
+.btn-reward   { background: var(--orange); color: #fff; border: none; }
+.btn-reward:hover { background: #bf360c; }
+.btn-rewarded { background: #e8f5e9; color: var(--green); border: 1.5px solid #a5d6a7; cursor: default; line-height: 1.4; }
+.btn-rewarded small { font-size: .7rem; font-weight: 400; display: block; }
 
 .sortable { cursor: pointer; user-select: none; }
 .sortable:hover { color: var(--green); }
