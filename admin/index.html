@@ -38,6 +38,7 @@
   <div class="tab-nav">
     <button class="tab-btn active" id="tab-btn-questions">📋 รายการโจทย์</button>
     <button class="tab-btn"        id="tab-btn-players">📊 สถิติผู้เล่น</button>
+    <button class="tab-btn"        id="tab-btn-reports">📈 รายงาน</button>
   </div>
 
   <!-- ══ TAB: รายการโจทย์ ══ -->
@@ -54,19 +55,37 @@
 
   <!-- ══ TAB: สถิติผู้เล่น ══ -->
   <div id="tab-players" class="tab-content hidden">
-    <!-- Summary cards -->
     <div id="stats-cards" class="stats-cards"></div>
 
     <!-- Filter bar -->
     <div class="player-filters">
-      <div class="date-filters">
-        <button class="date-btn active" data-f="all">ทั้งหมด</button>
-        <button class="date-btn" data-f="today">วันนี้</button>
-        <button class="date-btn" data-f="week">สัปดาห์นี้</button>
-        <button class="date-btn" data-f="month">เดือนนี้</button>
+      <div class="filter-group">
+        <div class="date-filters">
+          <button class="date-btn active" data-f="all">ทั้งหมด</button>
+          <button class="date-btn" data-f="today">วันนี้</button>
+          <button class="date-btn" data-f="week">สัปดาห์นี้</button>
+          <button class="date-btn" data-f="month">เดือนนี้</button>
+        </div>
+        <div class="reward-filters">
+          <button class="reward-btn active" data-r="all">🎯 ทุกคน</button>
+          <button class="reward-btn" data-r="pending">🎁 ยังไม่มอบ</button>
+          <button class="reward-btn" data-r="done">✅ รับแล้ว</button>
+        </div>
       </div>
-      <input id="player-search" type="text" placeholder="🔍 ค้นหาชื่อหรือเบอร์โทร" class="search-input" />
-      <button id="btn-refresh-p" class="btn btn-sm btn-outline">🔄 โหลดใหม่</button>
+      <div class="filter-row2">
+        <input id="player-search" type="text" placeholder="🔍 ค้นหาชื่อหรือเบอร์โทร" class="search-input" />
+        <div class="page-size-wrap">
+          <span class="page-size-label">แสดง</span>
+          <select id="page-size" class="page-size-select">
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="0">ทั้งหมด</option>
+          </select>
+          <span class="page-size-label">รายการ</span>
+        </div>
+        <button id="btn-refresh-p" class="btn btn-sm btn-outline">🔄 โหลดใหม่</button>
+      </div>
     </div>
 
     <div id="p-loading" class="state-text">กำลังโหลด…</div>
@@ -85,10 +104,37 @@
         </thead>
         <tbody id="player-tbody"></tbody>
       </table>
+      <div id="pagination" class="pagination"></div>
     </div>
     <div id="p-empty" class="state-text hidden">ไม่พบผู้เล่น</div>
   </div>
 
+  <!-- ══ TAB: รายงาน ══ -->
+  <div id="tab-reports" class="tab-content hidden">
+    <div class="content-toolbar">
+      <h2 class="content-title">📈 รายงานสถิติ</h2>
+      <div class="report-filters">
+        <button class="report-btn active" data-p="week">สัปดาห์นี้</button>
+        <button class="report-btn" data-p="month">เดือนนี้</button>
+        <button class="report-btn" data-p="all">ทั้งหมด</button>
+      </div>
+    </div>
+    <div id="r-loading" class="state-text">กำลังโหลด…</div>
+    <div id="r-content" class="hidden">
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3 class="chart-title">จำนวนผู้เล่นแต่ละวัน</h3>
+          <canvas id="chart-daily"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Top 10 คะแนนสูงสุด</h3>
+          <canvas id="chart-scores"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="admin.js"></script>
 </html>
